@@ -5,15 +5,32 @@ $password = "@Mysqlphp";
 $dbname = "mytodolist";
 $title = "Todo List App";
 $action = "Add task";
+$value = "";
+$newAction = "new";
 
 //Create Connection to data base
 try {
     $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
     // Set the PDO error mode to exception
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    echo "Connected successfully";
+    // echo "Connected successfully";
 } catch(PDOException $e) {
     echo "Connection failed: " . $e->getMessage();
+}
+
+try {
+    if(isset($_POST['new'])) {
+        if(!empty($_POST['new'])) {
+            $new = htmlspecialchars($_POST['new']);
+            $date = date("G:i:s",time());
+            $sql = "INSERT INTO todo (task, task_date) VALUES ('$new', '$date')";
+            $stmt=$conn->prepare($sql);
+            $stmt->execute();
+            echo "New record created successfully";
+        }
+    }
+} catch (PDOException $e) {
+    echo $sql . "<br>" . $e->getMessage;
 }
 
 ?>
@@ -67,8 +84,8 @@ try {
     <div id="header">
         <h2><?php echo $title; ?></h2>
         <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
-            <input type="text" name="task">
-            <input type="submit" name="submit" value="<?php echo $action; ?>">
+            <input type="text" name="task" value="<?php echo $value; ?>">
+            <input type="submit" name="<?php echo $newAction; ?>" value="<?php echo $action; ?>">
         </form>
     </div>
     <div>
