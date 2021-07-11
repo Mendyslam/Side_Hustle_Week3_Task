@@ -5,7 +5,7 @@ $password = "@Mysqlphp";
 $dbname = "mytodolist";
 $title = "Todo List App";
 $action = "Add task";
-$value = "";
+$value = "task";
 $newAction = "new";
 
 //Create Connection to data base
@@ -18,12 +18,13 @@ try {
     echo "Connection failed: " . $e->getMessage();
 }
 
+//Insert Data to the Database
 try {
     if(isset($_POST['new'])) {
-        if(!empty($_POST['new'])) {
-            $new = htmlspecialchars($_POST['new']);
+        if(!empty($_POST['task'])) {
+            $task = htmlspecialchars($_POST['task']);
             $date = date("G:i:s",time());
-            $sql = "INSERT INTO todo (task, task_date) VALUES ('$new', '$date')";
+            $sql = "INSERT INTO todo (task, task_date) VALUES ('$task', '$date')";
             $stmt=$conn->prepare($sql);
             $stmt->execute();
             echo "New record created successfully";
@@ -31,6 +32,16 @@ try {
     }
 } catch (PDOException $e) {
     echo $sql . "<br>" . $e->getMessage;
+}
+
+//SELECT data from the database
+try {
+    $sql = "SELECT * FROM todo";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+    $record = $stmt->fetchAll(PDO::FETCH_OBJ);
+} catch (PDOException $e) {
+    echo "Error: " . $e->getMessage;
 }
 
 ?>
@@ -84,7 +95,7 @@ try {
     <div id="header">
         <h2><?php echo $title; ?></h2>
         <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST">
-            <input type="text" name="task" value="<?php echo $value; ?>">
+            <input type="text" name="<?php echo $value; ?>">
             <input type="submit" name="<?php echo $newAction; ?>" value="<?php echo $action; ?>">
         </form>
     </div>
@@ -98,13 +109,15 @@ try {
             <th>DELETE</th>
         </thead>
         <tbody>
+            <?php foreach($record as $row): ?>
             <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td><button><a href="#">Update</a></button></td>
-                <td><button><a href="#">Delete</a></button></td>
+                <td><?php echo $row->id; ?></td>
+                <td><?php echo $row->task; ?></td>
+                <td><?php echo $row->task_date; ?></td>
+                <td><button><a href="index.php?id=<?php echo $row->id ?>">Update</a></button></td>
+                <td><button><a href="index.php?id=<?php echo $row->id ?>">Delete</a></button></td>
             </tr>
+            <?php endforeach; ?>
         </tbody>
         </table>
     </div>
